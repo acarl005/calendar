@@ -1,7 +1,38 @@
-ol {
-  padding-left: 20px;
+body {
+  margin-bottom: 80px;
 }
 
 #month {
   color: white;
+}
+
+.panel-body {
+  max-height: 500px;
+  overflow: scroll;
+}
+
+#chat-panel {
+  max-height: 300px;
+  overflow: scroll;
+}
+
+.message {
+  padding: 10px;
+}
+
+.chat {
+  margin: 0;
+  display: inline;
+}
+
+.chat.author {
+  font-weight: bold;
+}
+
+.chat.date {
+  font-style: italic;
+}
+
+.chat.text {
+  color: #aaa;
 }
