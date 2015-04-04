@@ -11,11 +11,16 @@ var sampleChat = [
 { author: "acarl005", date: 'right now', text: "It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged."}
 ];
 
-var messagesRef = new Firebase('https://popping-fire-8919.firebaseio.com/');
+function makeDate(number) {
+  var theDate = new Date(number) == 'Invalid Date' ? new Date(0) : new Date(number);
+  var mon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][theDate.getMonth()];
+  var day = theDate.getDate();
+  var hour = theDate.getHours();
+  var minute = String(theDate.getMinutes());
+  minute = minute.length === 1 ? '0' + minute : minute;
+  return mon + ' ' + day + ', ' + hour + ':' + minute;
+}
 
-messagesRef.limitToLast(1).on('child_added', function (snapshot) {
-  console.log(snapshot.val());
-});
 
 
 var CommentForm = React.createClass({
@@ -28,7 +33,8 @@ var CommentForm = React.createClass({
       return;
     };
     this.refs.text.getDOMNode().value = '';
-    this.props.submitted({'author': author, 'text': text, 'date': 'now'});
+    var now = new Date();
+    this.props.submitted({'author': author, 'text': text, 'date': +now});
   },
   render: function() {
     return (
@@ -52,6 +58,7 @@ var ChatBox = React.createClass({
   },
   componentDidMount: function() {
     var self = this;
+    self.loadChatFromServer();
     function loopsiloop(){
       setTimeout(function(){
         self.loadChatFromServer();
@@ -61,7 +68,6 @@ var ChatBox = React.createClass({
     loopsiloop();
   },
   handleSubmit: function(data) {
-    console.log(data);
     data = JSON.stringify(data);
     $.ajax({
       url: this.props.url,
@@ -69,7 +75,6 @@ var ChatBox = React.createClass({
       type: 'POST',
       data: data,
       success: function(data) {
-        console.log(data);
         this.loadChatFromServer();
       }.bind(this),
       error: function(xhr, status, err) {
@@ -84,7 +89,6 @@ var ChatBox = React.createClass({
       type: 'GET',
       dataType: 'json',
       success: function(data) {
-        console.log(data);
         this.setState({data: data});
       }.bind(this),
       error: function(xhr, status, err) {
@@ -93,14 +97,13 @@ var ChatBox = React.createClass({
     });
   },
   render: function() {
-    console.log('new array', this.state.data);
     var chatNodes = [];
     for (i in this.state.data) {
       var message = this.state.data[i];
       chatNodes.push(
         <div className="message" key={i} >
           <p className="chat author">{message.author} &nbsp; </p>
-          <p className="chat date">{message.date}:</p><br />
+          <p className="chat date">{makeDate(message.date)}</p><br />
           <p className="chat text">{message.text}</p>
         </div>
       );
@@ -147,6 +150,7 @@ var CalendarView = React.createClass({
   loadFromServer: function() {
     $.ajax({
       url: this.props.url,
+      type: 'GET',
       dataType: 'json',
       success: function(data) {
         this.setState({data: data});
